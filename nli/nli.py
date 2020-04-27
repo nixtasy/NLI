@@ -24,8 +24,11 @@ class Evaluation:
         return (TP + TN) / (TP + TN + FP + FN)
 
     def MimicPredictions(self):
+        with jsonlines.open('jsonl/train.jsonl') as reader:
+            train = [obj for obj in reader]
         pseudo_predictions = [1 for i in range(len(train))]
         pseudo_predictions[:10]
+        return pseudo_predictions
 
     def Eva(self, Hn, predictions, labels):
         TP = 0
@@ -53,17 +56,12 @@ class Evaluation:
 
 class   BaselineClassifier(Evaluation):
     def __init__(self, fit_intercept=True):
-        self.coef_ = None
-        self.intercept_ = None
-        self.fit_intercept_ = fit_intercept
-        self.is_fitted = False
-        self.features_ = None
-        self.target_ = None
+        pass
 
     def __repr__(self):
         return "I am a Linear Regression model!"
 
-    def ingest_data(self, X, y):
+    def ingest_data(self,X,y):
         """
        Ingests the given data
 
@@ -71,12 +69,31 @@ class   BaselineClassifier(Evaluation):
         X: 1D or 2D numpy array
         y: 1D numpy array
         """
-        # check if X is 1D or 2D array
+        with jsonlines.open('jsonl/train.jsonl') as reader:
+            train = [obj for obj in reader]
+
+        with jsonlines.open('jsonl/train-labels.lst') as reader:
+            train_labels = [obj for obj in reader]
+
+        with jsonlines.open('jsonl/dev.jsonl') as reader:
+            dev = [obj for obj in reader]
+
+        with jsonlines.open('jsonl/dev-labels.lst') as reader:
+            dev_labels = [obj for obj in reader]
+
+            # check if X is 1D or 2D array
         if len(X.shape) == 1:
             X = X.reshape(-1, 1)
 
         # features and data
         self.features_ = X
         self.target_ = y
+        return train_labels
+# test_prediction = Evaluation
+# test_train_labels =  BaselineClassifier
+# testresult = Evaluation.Eva(1, test_prediction.MimicPredictions(), test_train_labels.ingest_data())
 
-
+testEva = Evaluation()
+Baseline = BaselineClassifier()
+prediction = Baseline.MimicPredictions()
+testEva.Eva(1, prediction, Baseline.ingest_data())
