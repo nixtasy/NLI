@@ -7,5 +7,5 @@ class KB:
         self.label = label
         self.F = []  #feature list
 
-    def featureExtraction(self):
+    def feature_extraction(self):
         pass

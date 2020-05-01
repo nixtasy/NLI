@@ -13,7 +13,13 @@ class Learning:
         self.train_label_path = 'jsonl/train-labels.lst'
         self.dev_label_path = 'jsonl/dev-labels.lst'
 
-    def ingestData(self):
+    def ingest_data(self):
+        """
+        First load raw train and dev data,
+        split hypothesises, so that each instance contains
+        (o1,o2,h1/h2) and a label(1/0)
+
+        """
         with jsonlines.open(self.train_data_path) as reader:
             train_data = [obj for obj in reader]
 
@@ -34,13 +40,13 @@ class Learning:
             self.dev.append(KB(X['obs1'],X['obs2'],X['hyp1'],1 if Y == 1 else 0))
             self.dev.append(KB(X['obs1'], X['obs2'], X['hyp2'], 1 if Y == 2 else 0))
 
-    def getLabels(self, data='train'):
+    def get_labels(self, data='train'):
         if data == 'train':
             return [i.label for i in self.train]
         else:
             return [i.label for i in self.dev]
 
-    def mimicPredictions(self):
+    def mimic_predictions(self):
         pred = []
         for i in range(len(self.train)):
             if i%2 == 0:
@@ -51,8 +57,8 @@ class Learning:
 
 def main():
     Classifier = Learning()
-    Classifier.ingestData()
-    Eva = Utils(Classifier.mimicPredictions(),Classifier.getLabels(data = 'train'))
+    Classifier.ingest_data()
+    Eva = Utils(Classifier.mimic_predictions(),Classifier.get_labels(data = 'train'))
     Eva.Evaluation()
 
 if __name__ == "__main__":

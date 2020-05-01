@@ -4,5 +4,5 @@ class Perceptron:
         self.weights = None
         self.prediction = None
 
-    def updateWeights(self):
+    def update_weights(self):
         pass
