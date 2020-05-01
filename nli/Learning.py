@@ -13,7 +13,7 @@ class Learning:
         self.train_label_path = 'jsonl/train-labels.lst'
         self.dev_label_path = 'jsonl/dev-labels.lst'
 
-    def ingest_data(self):
+    def ingestData(self):
         with jsonlines.open(self.train_data_path) as reader:
             train_data = [obj for obj in reader]
 
@@ -51,7 +51,7 @@ class Learning:
 
 def main():
     Classifier = Learning()
-    Classifier.ingest_data()
+    Classifier.ingestData()
     Eva = Utils(Classifier.mimicPredictions(),Classifier.getLabels(data = 'train'))
     Eva.Evaluation()
 
