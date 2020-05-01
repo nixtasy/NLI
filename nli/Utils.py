@@ -53,21 +53,3 @@ class Utils:
         self.Accuracy()
         print("Precison %f, Recall %f, Accuracy %f, F1 %f" % (self.P, self.R, self.A, self.F))
 
-    # def Evaluation(self, Hn):
-    #     for p, l in zip(self.predictions, self.labels):
-    #         if p == Hn:
-    #             if l == p:
-    #                 self.tp += 1
-    #             else:
-    #                 self.fp += 1
-    #         else:
-    #             if l == p:
-    #                 self.tn += 1
-    #             else:
-    #                 self.fn += 1
-    #     self.Precision()
-    #     self.Recall()
-    #     self.F()
-    #     self.Accuracy()
-    #     print("H%d: Precison %f, Recall %f, Accuracy %f, F1 %f" % (Hn, self.P, self.R, self.A, self.F))
-

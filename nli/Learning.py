@@ -40,7 +40,7 @@ class Learning:
         else:
             return [i.label for i in self.dev]
 
-    def mimic_predictions(self):
+    def mimicPredictions(self):
         pred = []
         for i in range(len(self.train)):
             if i%2 == 0:
@@ -52,7 +52,7 @@ class Learning:
 def main():
     Classifier = Learning()
     Classifier.ingest_data()
-    Eva = Utils(Classifier.mimic_predictions(),Classifier.getLabels(data = 'train'))
+    Eva = Utils(Classifier.mimicPredictions(),Classifier.getLabels(data = 'train'))
     Eva.Evaluation()
 
 if __name__ == "__main__":
