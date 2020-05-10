@@ -10,7 +10,7 @@ class KB:
         self.F = []  #feature list
 
     def feature_extraction(self):
-        vocabulary = []
+        vocabulary=[]
         tokens_o1 = [token.lower() for token in self.o1.split()]
         tokens_o2 = [token.lower() for token in self.o2.split()]
         tokens_h = [token.lower() for token in self.h.split()]
@@ -22,6 +22,8 @@ class KB:
         vocabulary.extend(tokens_o1)
         vocabulary.extend(tokens_o2)
         vocabulary.extend(tokens_h)
+        vocabulary = list(set(vocabulary))
+
 
         v1 = [0 for i in range(len(vocabulary))]
         v2 = [0 for i in range(len(vocabulary))]
@@ -33,6 +35,7 @@ class KB:
             v2[vocabulary.index(token)] += 1
         for token in tokens_h:
             vh[vocabulary.index(token)] += 1
+
 
         v1_len = 0
         v2_len = 0
@@ -48,8 +51,37 @@ class KB:
         v2_len = math.sqrt(v2_len)
         vh_len = math.sqrt(vh_len)
 
-        self.F.append(sum([i*j for (i, j) in zip(v1, vh)]) / (v1_len * vh_len))
-        self.F.append(sum([i*j for (i, j) in zip(v2, vh)]) / (v2_len * vh_len))
+
+        #
+        # if sum([i*j for (i, j) in zip(v1, vh)]):
+        #     self.F.append(1)
+        # else:
+        #     self.F.append(0)
+        #
+        # if sum([i*j for (i, j) in zip(v2, vh)]):
+        #     self.F.append(1)
+        # else:
+        #     self.F.append(0)
+
+
+        # if sum([i * j for (i, j) in zip(v1, vh)]) >= 2:
+        #     self.F.append(1)
+        # else:
+        #     self.F.append(0)
+        #
+        # if sum([i * j for (i, j) in zip(v2, vh)]) >= 2:
+        #     self.F.append(1)
+        # else:
+        #     self.F.append(0)
+
+
+        self.F.append(sum([i*j for (i, j) in zip(v1, vh)]))
+        self.F.append(sum([i*j for (i, j) in zip(v2, vh)]))
+
+
+
+        # self.F.append(sum([i*j for (i, j) in zip(v1, vh)]) / (v1_len * vh_len))
+        # self.F.append(sum([i*j for (i, j) in zip(v2, vh)]) / (v2_len * vh_len))
         # self.F = [0,0]
         # for i in range(len(v1)):
         #     self.F[0] += v1[i] * vh[i]

@@ -31,6 +31,8 @@ class Learning:
         for X, Y in zip(train_data, train_label):
             self.train.append(KB(X['obs1'],X['obs2'],X['hyp1'],1 if Y == 1 else 0))
             self.train.append(KB(X['obs1'], X['obs2'], X['hyp2'], 1 if Y == 2 else 0))
+        # for X, Y in zip(train_data, train_label):
+        #     self.train.append(KB(X['obs1'],X['obs2'],X['hyp1'], X['hyp2'],Y))
 
         with jsonlines.open(self.dev_data_path) as reader:
             dev_data = [obj for obj in reader]
@@ -41,6 +43,8 @@ class Learning:
         for X, Y in zip(dev_data, dev_label):
             self.dev.append(KB(X['obs1'],X['obs2'],X['hyp1'],1 if Y == 1 else 0))
             self.dev.append(KB(X['obs1'], X['obs2'], X['hyp2'], 1 if Y == 2 else 0))
+        # for X, Y in zip(dev_data, dev_label):
+        #     self.dev.append(KB(X['obs1'],X['obs2'],X['hyp1'], X['hyp2'],Y))
 
     def get_labels(self, data='train'):
         if data == 'train':
@@ -135,10 +139,10 @@ def main():
     lables = Classifier.get_labels()
 
 
-    start_state = random.getstate()
-    random.shuffle(features)
-    random.setstate(start_state)
-    random.shuffle(lables)
+    # start_state = random.getstate()
+    # random.shuffle(features)
+    # random.setstate(start_state)
+    # random.shuffle(lables)
 
     session = Perceptron(features[0], lables[0])
     for i in range(len(features)-1):
@@ -149,12 +153,24 @@ def main():
     dev_features = Classifier.get_features(data='dev')
     dev_lables = Classifier.get_labels(data='dev')
     session = Perceptron(dev_features[0], dev_lables[0], W)
+    # session = Perceptron(features[0], lables[0], W)
     predictions = []
     for i in range(len(dev_features) - 1):
         predictions.append(session.predict(result=True))
         session.feed(dev_features[i + 1], dev_lables[i + 1])
-
+    print(predictions)
     Eva = Utils(predictions, dev_lables)
+    # print(features[:100])
+    # for i in range(len(features) - 1):
+    #     predictions.append(session.predict(result=True))
+    #     session.feed(features[i + 1], lables[i + 1])
+    # count = 0
+    # print(predictions)
+    # for p in predictions:
+    #     if p:
+    #         count += 1
+    # print(count/len(predictions))
+    # Eva = Utils(predictions, lables)
     Eva.Evaluation()
 
 
