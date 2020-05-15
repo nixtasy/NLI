@@ -3,6 +3,8 @@ from Utils import  Utils
 from Perceptron import  Perceptron
 import jsonlines
 import random
+import math
+import numpy as np
 
 class Learning:
 
@@ -45,6 +47,177 @@ class Learning:
             self.dev.append(KB(X['obs1'], X['obs2'], X['hyp2'], 1 if Y == 2 else 0))
         # for X, Y in zip(dev_data, dev_label):
         #     self.dev.append(KB(X['obs1'],X['obs2'],X['hyp1'], X['hyp2'],Y))
+
+    def generate_cross_features(self,data='train'):
+        if data == 'train':
+            for t in range(len(self.train)):
+                vocabulary = []
+                if t % 2 == 0:
+                    o1 = [token.lower() for token in self.train[t].o1.split()]
+                    o2 = [token.lower() for token in self.train[t].o2.split()]
+                    h1 = [token.lower() for token in self.train[t].h.split()]
+                    h2 = [token.lower() for token in self.train[t+1].h.split()]
+
+                    o1[-1] = o1[-1][:-1]
+                    o2[-1] = o2[-1][:-1]
+                    h1[-1] = h1[-1][:-1]
+                    h2[-1] = h2[-1][:-1]
+
+                    vocabulary.extend(o1)
+                    vocabulary.extend(o2)
+                    vocabulary.extend(h1)
+                    vocabulary.extend(h2)
+                    vocabulary = list(set(vocabulary))
+
+                    v1 = [0 for i in range(len(vocabulary))]
+                    v2 = [0 for i in range(len(vocabulary))]
+                    vh1 = [0 for i in range(len(vocabulary))]
+                    vh2 = [0 for i in range(len(vocabulary))]
+
+                    for token in o1:
+                        v1[vocabulary.index(token)] += 1
+                    for token in o2:
+                        v2[vocabulary.index(token)] += 1
+                    for token in h1:
+                        vh1[vocabulary.index(token)] += 1
+                    for token in h2:
+                        vh2[vocabulary.index(token)] += 1
+
+                    v1_len = 0
+                    v2_len = 0
+                    vh1_len = 0
+                    vh2_len = 0
+
+                    for i,j,k,r in zip(v1,v2,vh1,vh2):
+                        if i:
+                            v1_len += i*i
+                        if j:
+                            v2_len += j*j
+                        if k:
+                            vh1_len += k*k
+                        if r:
+                            vh2_len += r*r
+                    v1_len = math.sqrt(v1_len)
+                    v2_len = math.sqrt(v2_len)
+                    vh1_len = math.sqrt(vh1_len)
+                    vh2_len = math.sqrt(vh2_len)
+
+                    cos_o1_h1 = sum([i * j for (i, j) in zip(v1, vh1)]) / (v1_len * vh1_len)
+                    cos_o1_h2 = sum([i * j for (i, j) in zip(v1, vh2)]) / (v1_len * vh2_len)
+
+                    if cos_o1_h1 > cos_o1_h2:
+                        self.train[t].add_feature(1)
+                        self.train[t+1].add_feature(0)
+                    elif cos_o1_h1 == cos_o1_h2 and cos_o1_h1 != 0:
+                        self.train[t].add_feature(1)
+                        self.train[t + 1].add_feature(1)
+                    elif cos_o1_h1 < cos_o1_h2:
+                        self.train[t].add_feature(0)
+                        self.train[t + 1].add_feature(1)
+                    else:
+                        self.train[t].add_feature(0)
+                        self.train[t + 1].add_feature(0)
+
+                    cos_o2_h1 = sum([i * j for (i, j) in zip(v2, vh1)]) / (v2_len * vh1_len)
+                    cos_o2_h2 = sum([i * j for (i, j) in zip(v2, vh2)]) / (v2_len * vh2_len)
+
+                    if cos_o2_h1 > cos_o2_h2:
+                        self.train[t].add_feature(1)
+                        self.train[t+1].add_feature(0)
+                    elif cos_o2_h1 == cos_o2_h2 and cos_o2_h1 != 0:
+                        self.train[t].add_feature(1)
+                        self.train[t + 1].add_feature(1)
+                    elif cos_o2_h1 < cos_o2_h2:
+                        self.train[t].add_feature(0)
+                        self.train[t + 1].add_feature(1)
+                    else:
+                        self.train[t].add_feature(0)
+                        self.train[t + 1].add_feature(0)
+        else:
+            for d in range(len(self.dev)):
+                vocabulary = []
+                if d % 2 == 0:
+                    o1 = [token.lower() for token in self.dev[d].o1.split()]
+                    o2 = [token.lower() for token in self.dev[d].o2.split()]
+                    h1 = [token.lower() for token in self.dev[d].h.split()]
+                    h2 = [token.lower() for token in self.dev[d + 1].h.split()]
+
+                    o1[-1] = o1[-1][:-1]
+                    o2[-1] = o2[-1][:-1]
+                    h1[-1] = h1[-1][:-1]
+                    h2[-1] = h2[-1][:-1]
+
+                    vocabulary.extend(o1)
+                    vocabulary.extend(o2)
+                    vocabulary.extend(h1)
+                    vocabulary.extend(h2)
+                    vocabulary = list(set(vocabulary))
+
+                    v1 = [0 for i in range(len(vocabulary))]
+                    v2 = [0 for i in range(len(vocabulary))]
+                    vh1 = [0 for i in range(len(vocabulary))]
+                    vh2 = [0 for i in range(len(vocabulary))]
+
+                    for token in o1:
+                        v1[vocabulary.index(token)] += 1
+                    for token in o2:
+                        v2[vocabulary.index(token)] += 1
+                    for token in h1:
+                        vh1[vocabulary.index(token)] += 1
+                    for token in h2:
+                        vh2[vocabulary.index(token)] += 1
+
+                    v1_len = 0
+                    v2_len = 0
+                    vh1_len = 0
+                    vh2_len = 0
+
+                    for i, j, k, r in zip(v1, v2, vh1, vh2):
+                        if i:
+                            v1_len += i * i
+                        if j:
+                            v2_len += j * j
+                        if k:
+                            vh1_len += k * k
+                        if r:
+                            vh2_len += r * r
+                    v1_len = math.sqrt(v1_len)
+                    v2_len = math.sqrt(v2_len)
+                    vh1_len = math.sqrt(vh1_len)
+                    vh2_len = math.sqrt(vh2_len)
+
+                    cos_o1_h1 = sum([i * j for (i, j) in zip(v1, vh1)]) / (v1_len * vh1_len)
+                    cos_o1_h2 = sum([i * j for (i, j) in zip(v1, vh2)]) / (v1_len * vh2_len)
+                    if cos_o1_h1 > cos_o1_h2:
+                        self.dev[d].add_feature(1)
+                        self.dev[d + 1].add_feature(0)
+                    elif cos_o1_h1 == cos_o1_h2 and cos_o1_h1 != 0:
+                        self.dev[d].add_feature(1)
+                        self.dev[d + 1].add_feature(1)
+                    elif cos_o1_h1 < cos_o1_h2:
+                        self.dev[d].add_feature(0)
+                        self.dev[d + 1].add_feature(1)
+                    else:
+                        self.dev[d].add_feature(0)
+                        self.dev[d + 1].add_feature(0)
+
+                    cos_o2_h1 = sum([i * j for (i, j) in zip(v2, vh1)]) / (v2_len * vh1_len)
+                    cos_o2_h2 = sum([i * j for (i, j) in zip(v2, vh2)]) / (v2_len * vh2_len)
+
+                    if cos_o2_h1 > cos_o2_h2:
+                        self.dev[d].add_feature(1)
+                        self.dev[d+1].add_feature(0)
+                    elif cos_o2_h1 == cos_o2_h2 and cos_o2_h1 != 0:
+                        self.dev[d].add_feature(1)
+                        self.dev[d+1].add_feature(1)
+                    elif cos_o2_h1 < cos_o2_h2:
+                        self.dev[d].add_feature(0)
+                        self.dev[d+1].add_feature(1)
+                    else:
+                        self.dev[d].add_feature(0)
+                        self.dev[d+1].add_feature(0)
+        # print('Cross features successfully generated ..')
+
 
     def get_labels(self, data='train'):
         if data == 'train':
@@ -126,59 +299,48 @@ class Learning:
 def main():
     Classifier = Learning()
     Classifier.ingest_data()
-    # vocab = Classifier.get_vocabulary()
-    # print(len(vocab))
+
     for i in Classifier.train:
         i.feature_extraction()
     for i in Classifier.dev:
         i.feature_extraction()
-    # print(Classifier.get_features())
-    # with open('train_F.txt', 'w') as file:
-    #     file.writelines((str(i[0])+'\t'+str(i[1])+'\n' for i in Classifier.get_features()))
+
+    Classifier.generate_cross_features(data='train')
+    Classifier.generate_cross_features(data='dev')
+
     features = Classifier.get_features()
     lables = Classifier.get_labels()
+    lr  = [0.003,0.006,0.009,0.3,0.6,0.9]
+    for llrr in lr:
+        print("==============================", llrr, "==========================================")
 
 
-    # start_state = random.getstate()
-    # random.shuffle(features)
-    # random.setstate(start_state)
-    # random.shuffle(lables)
+        # start_state = random.getstate()
+        # random.shuffle(features)
+        # random.setstate(start_state)
+        # random.shuffle(lables)
 
-    session = Perceptron(features[0], lables[0])
-    for i in range(len(features)-1):
-        session.train()
-        session.feed(features[i+1],lables[i+1])
-    W = session.weights
+        session = Perceptron(features[0], lables[0], learning_rate = llrr)
+        for i in range(len(features)-1):
+            session.train()
+            session.feed(features[i+1],lables[i+1])
+        W = session.weights
 
-    dev_features = Classifier.get_features(data='dev')
-    dev_lables = Classifier.get_labels(data='dev')
-    session = Perceptron(dev_features[0], dev_lables[0], W)
-    # session = Perceptron(features[0], lables[0], W)
-    predictions = []
-    for i in range(len(dev_features) - 1):
-        predictions.append(session.predict(result=True))
-        session.feed(dev_features[i + 1], dev_lables[i + 1])
-    print(predictions)
-    Eva = Utils(predictions, dev_lables)
-    # print(features[:100])
-    # for i in range(len(features) - 1):
-    #     predictions.append(session.predict(result=True))
-    #     session.feed(features[i + 1], lables[i + 1])
-    # count = 0
-    # print(predictions)
-    # for p in predictions:
-    #     if p:
-    #         count += 1
-    # print(count/len(predictions))
-    # Eva = Utils(predictions, lables)
-    Eva.Evaluation()
+        dev_features = Classifier.get_features(data='dev')
+        dev_lables = Classifier.get_labels(data='dev')
+        session = Perceptron(dev_features[0], dev_lables[0], W)
+        # session = Perceptron(features[0], lables[0], W)
+        print(dev_features[:100])
+        predictions = []
+        for i in range(len(dev_features) - 1):
+            predictions.append(session.predict(result=True))
+            session.feed(dev_features[i + 1], dev_lables[i + 1])
+        print(predictions)
+        Eva = Utils(predictions, dev_lables)
+        # print(len(dev_features[0]))
 
+        Eva.Evaluation()
 
-    # Classifier.tf_matrix('train')
-    # with open('train_F.txt', 'w') as file:
-    #     file.writelines((str(i.F)+'\n' for i in Classifier.train))
-    # Eva = Utils(Classifier.mimic_predictions(),Classifier.get_labels(data = 'train'))
-    # Eva.Evaluation()
 
 if __name__ == "__main__":
     # execute only if run as a script
