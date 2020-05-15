@@ -2,9 +2,17 @@ from KB import KB
 from Utils import  Utils
 from Perceptron import  Perceptron
 import jsonlines
-import random
 import math
-import numpy as np
+import time
+
+
+"""
+feature 1: for every tuple instance, "1" if a word from h, also occurs in both o1,o2; else 0.
+feature 2: for every tuple instance pairs, "1" if one of h has more such words as shown in feature 1 than another; else 0
+feature 3: for every tuple instance pairs, "1" if one of h reach smaller distance (calculated by : abs(len(o1)-len(h))+abs(len(o2)-len(h))) than another; else 0
+feature 4: for every tuple instance pairs, "1" if one of h reach higher cosine similarities (calculated by : cosim(o1,h)) than another; else 0
+feature 4: for every tuple instance pairs, "1" if one of h reach higher cosine similarities (calculated by : cosim(o2,h)) than another; else 0
+"""
 
 class Learning:
 
@@ -63,16 +71,49 @@ class Learning:
                     h1[-1] = h1[-1][:-1]
                     h2[-1] = h2[-1][:-1]
 
+                    if self.train[t].F[0]+self.train[t+1].F[0] != 0:
+                        overlap_score = [0]*2
+                        for h in h1:
+                            if h in o1 and h in o2:
+                                overlap_score[0] += 1
+                        for h in h2:
+                            if h in o1 and h in o2:
+                                overlap_score[1] += 1
+                        if overlap_score[0] == overlap_score[1]:
+                            self.train[t].add_feature(1)
+                            self.train[t + 1].add_feature(1)
+                        elif overlap_score[0] > overlap_score[1]:
+                            self.train[t].add_feature(1)
+                            self.train[t + 1].add_feature(0)
+                        else:
+                            self.train[t].add_feature(0)
+                            self.train[t + 1].add_feature(1)
+                    else:
+                        self.train[t].add_feature(0)
+                        self.train[t + 1].add_feature(0)
+
+                    len_diff_h1 = abs(len(o1)-len(h1))+abs(len(o2)-len(h1))
+                    len_diff_h2 = abs(len(o1) - len(h2)) + abs(len(o2) - len(h2))
+                    if len_diff_h1 > len_diff_h2:
+                        self.train[t].add_feature(0)
+                        self.train[t + 1].add_feature(1)
+                    elif len_diff_h1 < len_diff_h2:
+                        self.train[t].add_feature(1)
+                        self.train[t + 1].add_feature(0)
+                    else:
+                        self.train[t].add_feature(1)
+                        self.train[t + 1].add_feature(1)
+
                     vocabulary.extend(o1)
                     vocabulary.extend(o2)
                     vocabulary.extend(h1)
                     vocabulary.extend(h2)
                     vocabulary = list(set(vocabulary))
 
-                    v1 = [0 for i in range(len(vocabulary))]
-                    v2 = [0 for i in range(len(vocabulary))]
-                    vh1 = [0 for i in range(len(vocabulary))]
-                    vh2 = [0 for i in range(len(vocabulary))]
+                    v1 = [0] * len(vocabulary)
+                    v2 = [0] * len(vocabulary)
+                    vh1 = [0] * len(vocabulary)
+                    vh2 = [0] * len(vocabulary)
 
                     for token in o1:
                         v1[vocabulary.index(token)] += 1
@@ -97,6 +138,7 @@ class Learning:
                             vh1_len += k*k
                         if r:
                             vh2_len += r*r
+
                     v1_len = math.sqrt(v1_len)
                     v2_len = math.sqrt(v2_len)
                     vh1_len = math.sqrt(vh1_len)
@@ -131,8 +173,8 @@ class Learning:
                         self.train[t].add_feature(0)
                         self.train[t + 1].add_feature(1)
                     else:
-                        self.train[t].add_feature(0)
-                        self.train[t + 1].add_feature(0)
+                        self.train[t].add_feature(1)
+                        self.train[t + 1].add_feature(1)
         else:
             for d in range(len(self.dev)):
                 vocabulary = []
@@ -147,16 +189,49 @@ class Learning:
                     h1[-1] = h1[-1][:-1]
                     h2[-1] = h2[-1][:-1]
 
+                    if self.dev[d].F[0]+self.dev[d+1].F[0] != 0:
+                        overlap_score = [0]*2
+                        for h in h1:
+                            if h in o1 and h in o2:
+                                overlap_score[0] += 1
+                        for h in h2:
+                            if h in o1 and h in o2:
+                                overlap_score[1] += 1
+                        if overlap_score[0] == overlap_score[1]:
+                            self.dev[d].add_feature(1)
+                            self.dev[d+1].add_feature(1)
+                        elif overlap_score[0] > overlap_score[1]:
+                            self.dev[d].add_feature(1)
+                            self.dev[d+1].add_feature(0)
+                        else:
+                            self.dev[d].add_feature(0)
+                            self.dev[d+1].add_feature(1)
+                    else:
+                        self.dev[d].add_feature(0)
+                        self.dev[d+1].add_feature(0)
+
+                    len_diff_h1 = abs(len(o1) - len(h1)) + abs(len(o2) - len(h1))
+                    len_diff_h2 = abs(len(o1) - len(h2)) + abs(len(o2) - len(h2))
+                    if len_diff_h1 > len_diff_h2:
+                        self.dev[d].add_feature(0)
+                        self.dev[d + 1].add_feature(1)
+                    elif len_diff_h1 < len_diff_h2:
+                        self.dev[d].add_feature(1)
+                        self.dev[d + 1].add_feature(0)
+                    else:
+                        self.dev[d].add_feature(0)
+                        self.dev[d + 1].add_feature(0)
+
                     vocabulary.extend(o1)
                     vocabulary.extend(o2)
                     vocabulary.extend(h1)
                     vocabulary.extend(h2)
                     vocabulary = list(set(vocabulary))
 
-                    v1 = [0 for i in range(len(vocabulary))]
-                    v2 = [0 for i in range(len(vocabulary))]
-                    vh1 = [0 for i in range(len(vocabulary))]
-                    vh2 = [0 for i in range(len(vocabulary))]
+                    v1 = [0] * len(vocabulary)
+                    v2 = [0] * len(vocabulary)
+                    vh1 = [0] * len(vocabulary)
+                    vh2 = [0] * len(vocabulary)
 
                     for token in o1:
                         v1[vocabulary.index(token)] += 1
@@ -216,7 +291,6 @@ class Learning:
                     else:
                         self.dev[d].add_feature(0)
                         self.dev[d+1].add_feature(0)
-        # print('Cross features successfully generated ..')
 
 
     def get_labels(self, data='train'):
@@ -240,106 +314,55 @@ class Learning:
                 pred.append(0)
         return pred
 
-    def tf_matrix(self, data='train'):
-        if data == 'train':
-            vocab = self.get_vocabulary(data)
-            for i in self.train:
-                F = [0 for i in range(len(vocab))]
-                tokens_o1 = [token.lower() for token in i.o1.split()]
-                tokens_o2 = [token.lower() for token in i.o2.split()]
-                tokens_h = [token.lower() for token in i.h.split()]
-                tokens_o1[-1] = tokens_o1[-1][:-1]
-                tokens_o2[-1] = tokens_o2[-1][:-1]
-                tokens_h[-1] = tokens_h[-1][:-1]
-                for token in tokens_o1:
-                    F[vocab.index(token)] += 1
-                for token in tokens_o2:
-                    F[vocab.index(token)] += 1
-                for token in tokens_h:
-                    F[vocab.index(token)] -= 2
-                self.tfmatrix.append(F)
-        else:
-            vocab = self.get_vocabulary(data)
-            for i in self.dev:
-                F = [0 for i in range(len(vocab))]
-                tokens_o1 = [token.lower() for token in i.o1.split()]
-                tokens_o2 = [token.lower() for token in i.o2.split()]
-                tokens_h = [token.lower() for token in i.h.split()]
-                tokens_o1[-1] = tokens_o1[-1][:-1]
-                tokens_o2[-1] = tokens_o2[-1][:-1]
-                tokens_h[-1] = tokens_h[-1][:-1]
-                for token in tokens_o1:
-                    F[vocab.index(token)] += 1
-                for token in tokens_o2:
-                    F[vocab.index(token)] += 1
-                for token in tokens_h:
-                    F[vocab.index(token)] -= 2
-                self.tfmatrix.append(F)
-
-    def get_vocabulary(self):
-        tokens = []
-        for i in self.train:
-            tokens.extend([token.lower() for token in i.o1.split()])
-            tokens[-1] = tokens[-1][:-1]
-            tokens.extend([token.lower() for token in i.o2.split()])
-            tokens[-1] = tokens[-1][:-1]
-            tokens.extend([token.lower() for token in i.h.split()])
-            tokens[-1] = tokens[-1][:-1]
-
-        for i in self.dev:
-            tokens.extend([token.lower() for token in i.o1.split()])
-            tokens[-1] = tokens[-1][:-1]
-            tokens.extend([token.lower() for token in i.o2.split()])
-            tokens[-1] = tokens[-1][:-1]
-            tokens.extend([token.lower() for token in i.h.split()])
-            tokens[-1] = tokens[-1][:-1]
-        return list(set(tokens))
-
 
 def main():
-    Classifier = Learning()
-    Classifier.ingest_data()
+    print('Start ingesting data')
+    time_1 = time.time()
 
-    for i in Classifier.train:
+    c = Learning()
+    c.ingest_data()
+
+    time_2 = time.time()
+    print('read data cost ', time_2 - time_1, ' second', '\n')
+
+    print('Start extracting features..')
+    for i in c.train:
         i.feature_extraction()
-    for i in Classifier.dev:
+    for i in c.dev:
         i.feature_extraction()
+    c.generate_cross_features(data='train')
+    c.generate_cross_features(data='dev')
 
-    Classifier.generate_cross_features(data='train')
-    Classifier.generate_cross_features(data='dev')
+    train_features = c.get_features()
+    train_labels = c.get_labels()
 
-    features = Classifier.get_features()
-    lables = Classifier.get_labels()
-    lr  = [0.003,0.006,0.009,0.3,0.6,0.9]
-    for llrr in lr:
-        print("==============================", llrr, "==========================================")
+    dev_features = c.get_features(data='dev')
+    dev_lables = c.get_labels(data='dev')
+
+    time_3 = time.time()
+    print('feature extraction cost ', time_3 - time_2, ' second', '\n')
 
 
-        # start_state = random.getstate()
-        # random.shuffle(features)
-        # random.setstate(start_state)
-        # random.shuffle(lables)
+    print('Start training')
+    p = Perceptron()
+    p.train(train_features, train_labels)
 
-        session = Perceptron(features[0], lables[0], learning_rate = llrr)
-        for i in range(len(features)-1):
-            session.train()
-            session.feed(features[i+1],lables[i+1])
-        W = session.weights
+    time_4 = time.time()
+    print('training cost ', time_4 - time_3, ' second', '\n')
 
-        dev_features = Classifier.get_features(data='dev')
-        dev_lables = Classifier.get_labels(data='dev')
-        session = Perceptron(dev_features[0], dev_lables[0], W)
-        # session = Perceptron(features[0], lables[0], W)
-        print(dev_features[:100])
-        predictions = []
-        for i in range(len(dev_features) - 1):
-            predictions.append(session.predict(result=True))
-            session.feed(dev_features[i + 1], dev_lables[i + 1])
-        print(predictions)
-        Eva = Utils(predictions, dev_lables)
-        # print(len(dev_features[0]))
+    print('Start predicting')
+    p.predict(dev_features)
+    time_5 = time.time()
+    print('predicting cost ', time_5 - time_4, ' second', '\n')
 
-        Eva.Evaluation()
+    print(p.prediction)
+    print('Score on our baseline model:')
+    e = Utils(p.prediction, dev_lables)
+    e.evaluation()
+    print('Score on the mimic data:')
+    e = Utils(c.mimic_predictions(), dev_lables)
+    e.evaluation()
+
 
 
 if __name__ == "__main__":

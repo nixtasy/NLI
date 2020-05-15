@@ -1,5 +1,3 @@
-import jsonlines
-
 class Utils:
 
     def __init__(self, predictions, labels):
@@ -14,28 +12,28 @@ class Utils:
         self.A = 0 # Accuracy
         self.F = 0 # F-1 Score
 
-    def Precision(self):
+    def precision(self):
         if self.tp == 0:
             self.P = 0
         else:
             self.P = self.tp / (self.tp + self.fp)
 
-    def Recall(self):
+    def recall(self):
         if self.tp == 0:
             self.R = 0
         else:
             self.R = self.tp / (self.tp + self.fn)
 
-    def F1(self):
+    def f1(self):
         if self.P == 0:
             self.F = 0
         else:
             self.F =  2 * self.P * self.R / (self.P + self.R)
 
-    def Accuracy(self):
+    def accuracy(self):
         self.A = (self.tp + self.tn) / (self.tp + self.tn + self.fp + self.fn)
 
-    def Evaluation(self):
+    def evaluation(self):
         for p, l in zip(self.predictions, self.labels):
             if p == 1:
                 if l == 1:
@@ -47,9 +45,9 @@ class Utils:
                     self.tn += 1
                 else:
                     self.fn += 1
-        self.Precision()
-        self.Recall()
-        self.F1()
-        self.Accuracy()
+        self.precision()
+        self.recall()
+        self.f1()
+        self.accuracy()
         print("Precison %f, Recall %f, Accuracy %f, F1 %f" % (self.P, self.R, self.A, self.F))
 

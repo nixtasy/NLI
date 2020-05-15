@@ -1,6 +1,3 @@
-import re
-import math
-import json
 class KB:
 
     def __init__(self,o1,o2,h,label):
@@ -12,13 +9,11 @@ class KB:
 
 
     def add_feature(self, feature):
-        # if len(self.F) > 3:
-        #     print(len(self.F))
         self.F.append(feature)
 
 
     def feature_extraction(self):
-        # moving window feature F[1]:
+
         tokens_o1 = [token.lower() for token in self.o1.split()]
         tokens_o2 = [token.lower() for token in self.o2.split()]
         tokens_h = [token.lower() for token in self.h.split()]
@@ -27,30 +22,6 @@ class KB:
         tokens_o2[-1] = tokens_o2[-1][:-1]
         tokens_h[-1] = tokens_h[-1][:-1]
 
-
-        with open('stopwordlist.json','r') as f:
-            stopwordlist = list(json.load(f))
-
-        for token1 in tokens_o1:
-            if token1 in stopwordlist:
-                del token1
-
-        for token2 in tokens_o2:
-            if token2 in stopwordlist:
-                del token2
-
-        for tokenh in tokens_h:
-            if tokenh in stopwordlist:
-                del tokenh
-
-        # for token1 in tokens_o1:
-        #     for token2 in tokens_o2:
-        #         for tokenh in tokens_h:
-        #             if token1 == token2 == tokenh:
-        #                 self.F.append(1)
-        #                 break
-        #             else:
-        #                 self.F.append(0)
         res = 0
         for h in tokens_h:
             if h in tokens_o1 and h in tokens_o2:
@@ -58,111 +29,3 @@ class KB:
         self.F.append(res)
 
 
-        # l1 = len(tokens_o1)
-        # l2 = len(tokens_o2)
-        # lh = len(tokens_h)
-        # max_len = max(l1, l2, lh)
-        # len_windows = min(l1, l2, lh)
-        # C = 0
-        # steps = 0
-        # for i in range(max_len):
-        #     print("i", i)
-        #     steps += 1
-        #     for j in range(len_windows):
-        #         #             print("j",j)
-        #         if (i + j) < lh:
-        #             # print("current:", tokens_h[i + j])
-        #             #                 print(tokens_o1[i:min(i+len_windows,l1)])
-        #             #                 print(tokens_o2[i:min(i+len_windows,l2)])
-        #             if tokens_h[i + j] in tokens_o1[i:min(i + len_windows, l1)] or tokens_h[i + j] in tokens_o2[i:min(
-        #                     i + len_windows, l2)]:
-        #                 F = 1
-        #                 print("find")
-        #                 C += 1
-        #                 break
-        # F.append(C/steps)
-
-
-
-
-
-        # vocabulary=[]
-        # tokens_o1 = [token.lower() for token in self.o1.split()]
-        # tokens_o2 = [token.lower() for token in self.o2.split()]
-        # tokens_h = [token.lower() for token in self.h.split()]
-        #
-        # tokens_o1[-1] = tokens_o1[-1][:-1]
-        # tokens_o2[-1] = tokens_o2[-1][:-1]
-        # tokens_h[-1] = tokens_h[-1][:-1]
-        #
-        # vocabulary.extend(tokens_o1)
-        # vocabulary.extend(tokens_o2)
-        # vocabulary.extend(tokens_h)
-        # vocabulary = list(set(vocabulary))
-        #
-        # v1 = [0 for i in range(len(vocabulary))]
-        # v2 = [0 for i in range(len(vocabulary))]
-        # vh = [0 for i in range(len(vocabulary))]
-        #
-        # for token in tokens_o1:
-        #     v1[vocabulary.index(token)] += 1
-        # for token in tokens_o2:
-        #     v2[vocabulary.index(token)] += 1
-        # for token in tokens_h:
-        #     vh[vocabulary.index(token)] += 1
-        #
-        # v1_len = 0
-        # v2_len = 0
-        # vh_len = 0
-        # for i,j,k in zip(v1,v2,vh):
-        #     if i:
-        #         v1_len += i*i
-        #     if j:
-        #         v2_len += j*j
-        #     if k:
-        #         vh_len += k*k
-        # v1_len = math.sqrt(v1_len)
-        # v2_len = math.sqrt(v2_len)
-        # vh_len = math.sqrt(vh_len)
-
-
-        #
-        # if sum([i*j for (i, j) in zip(v1, vh)]):
-        #     self.F.append(1)
-        # else:
-        #     self.F.append(0)
-        #
-        # if sum([i*j for (i, j) in zip(v2, vh)]):
-        #     self.F.append(1)
-        # else:
-        #     self.F.append(0)
-
-
-        # if sum([i * j for (i, j) in zip(v1, vh)]) >= 2:
-        #     self.F.append(1)
-        # else:
-        #     self.F.append(0)
-        #
-        # if sum([i * j for (i, j) in zip(v2, vh)]) >= 2:
-        #     self.F.append(1)
-        # else:
-        #     self.F.append(0)
-
-
-        # self.F.append(sum([i*j for (i, j) in zip(v1, vh)]))
-        # self.F.append(sum([i*j for (i, j) in zip(v2, vh)]))
-
-
-
-        # self.F.append(sum([i*j for (i, j) in zip(v1, vh)]) / (v1_len * vh_len))
-        # self.F.append(sum([i*j for (i, j) in zip(v2, vh)]) / (v2_len * vh_len))
-        # self.F = [0,0]
-        # for i in range(len(v1)):
-        #     self.F[0] += v1[i] * vh[i]
-        #     self.F[1] += v2[i] * vh[i]
-
-
-        # print(v1)
-        # print(v2)
-        # print(vh)
-        # print(self.F)
