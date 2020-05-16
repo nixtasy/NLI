@@ -96,7 +96,7 @@ Our formatted (after pre-processing) version for training on a baseline model:
   * get_features() // get the feature of all the training/dev instances
   * mimic_predictions() // mimic predictions for comparing with our model
 
-## Methdology
+## Methodology
 ### Perceptron Classifier
 ### Feature Engineering
 
