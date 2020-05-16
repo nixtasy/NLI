@@ -1,5 +1,5 @@
 class Perceptron:
-    def __init__(self, learning_rate = 0.0006, max_iteration = 10):
+    def __init__(self, learning_rate = 0.0006, max_iteration = 20):
         self.weight = None
         self.prediction = []
         self.learning_rate = learning_rate
