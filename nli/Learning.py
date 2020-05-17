@@ -4,14 +4,14 @@ from Perceptron import  Perceptron
 import jsonlines
 import math
 import time
-
+import random
 
 """
 feature 1: for every tuple instance, "1" if a word from h, also occurs in both o1,o2; else 0.
 feature 2: for every tuple instance pairs, "1" if one of h has more such words as shown in feature 1 than another; else 0
 feature 3: for every tuple instance pairs, "1" if one of h reach smaller distance (calculated by : abs(len(o1)-len(h))+abs(len(o2)-len(h))) than another; else 0
 feature 4: for every tuple instance pairs, "1" if one of h reach higher cosine similarities (calculated by : cosim(o1,h)) than another; else 0
-feature 4: for every tuple instance pairs, "1" if one of h reach higher cosine similarities (calculated by : cosim(o2,h)) than another; else 0
+feature 5: for every tuple instance pairs, "1" if one of h reach higher cosine similarities (calculated by : cosim(o2,h)) than another; else 0
 """
 
 class Learning:
@@ -23,7 +23,6 @@ class Learning:
         self.dev_data_path = 'jsonl/dev.jsonl'
         self.train_label_path = 'jsonl/train-labels.lst'
         self.dev_label_path = 'jsonl/dev-labels.lst'
-        self.tfmatrix = []
 
     def ingest_data(self):
         """
@@ -56,7 +55,8 @@ class Learning:
         # for X, Y in zip(dev_data, dev_label):
         #     self.dev.append(KB(X['obs1'],X['obs2'],X['hyp1'], X['hyp2'],Y))
 
-    def generate_cross_features(self,data='train'):
+
+    def generate_cross_features(self, data='train'):
         if data == 'train':
             for t in range(len(self.train)):
                 vocabulary = []
@@ -64,15 +64,15 @@ class Learning:
                     o1 = [token.lower() for token in self.train[t].o1.split()]
                     o2 = [token.lower() for token in self.train[t].o2.split()]
                     h1 = [token.lower() for token in self.train[t].h.split()]
-                    h2 = [token.lower() for token in self.train[t+1].h.split()]
+                    h2 = [token.lower() for token in self.train[t + 1].h.split()]
 
                     o1[-1] = o1[-1][:-1]
                     o2[-1] = o2[-1][:-1]
                     h1[-1] = h1[-1][:-1]
                     h2[-1] = h2[-1][:-1]
 
-                    if self.train[t].F[0]+self.train[t+1].F[0] != 0:
-                        overlap_score = [0]*2
+                    if self.train[t].F[0] + self.train[t + 1].F[0] != 0:
+                        overlap_score = [0] * 2
                         for h in h1:
                             if h in o1 and h in o2:
                                 overlap_score[0] += 1
@@ -92,7 +92,7 @@ class Learning:
                         self.train[t].add_feature(0)
                         self.train[t + 1].add_feature(0)
 
-                    len_diff_h1 = abs(len(o1)-len(h1))+abs(len(o2)-len(h1))
+                    len_diff_h1 = abs(len(o1) - len(h1)) + abs(len(o2) - len(h1))
                     len_diff_h2 = abs(len(o1) - len(h2)) + abs(len(o2) - len(h2))
                     if len_diff_h1 > len_diff_h2:
                         self.train[t].add_feature(0)
@@ -129,15 +129,15 @@ class Learning:
                     vh1_len = 0
                     vh2_len = 0
 
-                    for i,j,k,r in zip(v1,v2,vh1,vh2):
+                    for i, j, k, r in zip(v1, v2, vh1, vh2):
                         if i:
-                            v1_len += i*i
+                            v1_len += i * i
                         if j:
-                            v2_len += j*j
+                            v2_len += j * j
                         if k:
-                            vh1_len += k*k
+                            vh1_len += k * k
                         if r:
-                            vh2_len += r*r
+                            vh2_len += r * r
 
                     v1_len = math.sqrt(v1_len)
                     v2_len = math.sqrt(v2_len)
@@ -149,7 +149,7 @@ class Learning:
 
                     if cos_o1_h1 > cos_o1_h2:
                         self.train[t].add_feature(1)
-                        self.train[t+1].add_feature(0)
+                        self.train[t + 1].add_feature(0)
                     elif cos_o1_h1 == cos_o1_h2 and cos_o1_h1 != 0:
                         self.train[t].add_feature(1)
                         self.train[t + 1].add_feature(1)
@@ -165,7 +165,7 @@ class Learning:
 
                     if cos_o2_h1 > cos_o2_h2:
                         self.train[t].add_feature(1)
-                        self.train[t+1].add_feature(0)
+                        self.train[t + 1].add_feature(0)
                     elif cos_o2_h1 == cos_o2_h2 and cos_o2_h1 != 0:
                         self.train[t].add_feature(1)
                         self.train[t + 1].add_feature(1)
@@ -189,8 +189,8 @@ class Learning:
                     h1[-1] = h1[-1][:-1]
                     h2[-1] = h2[-1][:-1]
 
-                    if self.dev[d].F[0]+self.dev[d+1].F[0] != 0:
-                        overlap_score = [0]*2
+                    if self.dev[d].F[0] + self.dev[d + 1].F[0] != 0:
+                        overlap_score = [0] * 2
                         for h in h1:
                             if h in o1 and h in o2:
                                 overlap_score[0] += 1
@@ -199,16 +199,16 @@ class Learning:
                                 overlap_score[1] += 1
                         if overlap_score[0] == overlap_score[1]:
                             self.dev[d].add_feature(1)
-                            self.dev[d+1].add_feature(1)
+                            self.dev[d + 1].add_feature(1)
                         elif overlap_score[0] > overlap_score[1]:
                             self.dev[d].add_feature(1)
-                            self.dev[d+1].add_feature(0)
+                            self.dev[d + 1].add_feature(0)
                         else:
                             self.dev[d].add_feature(0)
-                            self.dev[d+1].add_feature(1)
+                            self.dev[d + 1].add_feature(1)
                     else:
                         self.dev[d].add_feature(0)
-                        self.dev[d+1].add_feature(0)
+                        self.dev[d + 1].add_feature(0)
 
                     len_diff_h1 = abs(len(o1) - len(h1)) + abs(len(o2) - len(h1))
                     len_diff_h2 = abs(len(o1) - len(h2)) + abs(len(o2) - len(h2))
@@ -281,17 +281,16 @@ class Learning:
 
                     if cos_o2_h1 > cos_o2_h2:
                         self.dev[d].add_feature(1)
-                        self.dev[d+1].add_feature(0)
+                        self.dev[d + 1].add_feature(0)
                     elif cos_o2_h1 == cos_o2_h2 and cos_o2_h1 != 0:
                         self.dev[d].add_feature(1)
-                        self.dev[d+1].add_feature(1)
+                        self.dev[d + 1].add_feature(1)
                     elif cos_o2_h1 < cos_o2_h2:
                         self.dev[d].add_feature(0)
-                        self.dev[d+1].add_feature(1)
+                        self.dev[d + 1].add_feature(1)
                     else:
                         self.dev[d].add_feature(0)
-                        self.dev[d+1].add_feature(0)
-
+                        self.dev[d + 1].add_feature(0)
 
     def get_labels(self, data='train'):
         if data == 'train':
@@ -305,13 +304,22 @@ class Learning:
         else:
             return [i.F for i in self.dev]
 
-    def mimic_predictions(self):
-        pred = []
-        for i in range(len(self.train)):
+    def naive_predictions(self, data='train'):
+        dim = len(self.train) if data == 'train' else len(self.dev)
+        pred = [0]*dim
+        for i in range(dim):
             if i%2 == 0:
-                pred.append(1)
-            else:
-                pred.append(0)
+                pred[i] = 1
+                pred[i+1] = 0
+        return pred
+    def random_predictions(self, data='train'):
+        dim = len(self.train) if data == 'train' else len(self.dev)
+        pred = [0] * dim
+        for i in range(dim):
+            if i%2 == 0:
+                res = random.choice([1, 0])
+                pred[i] = res
+                pred[i + 1] = 1 - res
         return pred
 
 
@@ -339,6 +347,9 @@ def main():
     dev_features = c.get_features(data='dev')
     dev_lables = c.get_labels(data='dev')
 
+    print(train_features[:5])
+    print(dev_features[:5])
+
     time_3 = time.time()
     print('feature extraction cost ', time_3 - time_2, ' second', '\n')
 
@@ -352,16 +363,42 @@ def main():
 
     print('Start predicting')
     p.predict(dev_features)
+    print(p.prediction)
     time_5 = time.time()
     print('predicting cost ', time_5 - time_4, ' second', '\n')
 
-    print(p.prediction)
-    print('Score on our baseline model:')
+    print('Score on our baseline model  on dev set::')
     e = Utils(p.prediction, dev_lables)
-    e.evaluation()
-    print('Score on the mimic data:')
-    e = Utils(c.mimic_predictions(), dev_lables)
-    e.evaluation()
+    score =e.evaluation()
+    print("The accruacy socre is ", score)
+
+    p.predict(train_features)
+    print(p.prediction)
+    print('Score on our baseline model on training set:')
+    e = Utils(p.prediction, train_labels)
+    score =e.evaluation()
+    print("The accruacy socre is ", score)
+
+    print('Score on the naive predictions compatibale with dev:')
+    e = Utils(c.naive_predictions(data = 'dev'), dev_lables)
+    score =e.evaluation()
+    print("The accruacy socre is ", score)
+
+    print('Score on the naive predictions compatibale with training:')
+    e = Utils(c.naive_predictions(), train_labels)
+    score =e.evaluation()
+    print("The accruacy socre is ", score)
+
+    print('Score on the random predicitons compatibale with dev:')
+    e = Utils(c.random_predictions(), dev_lables)
+    score =e.evaluation()
+    print("The accruacy socre is ", score)
+
+    print('Score on the random predicitons compatibale with training')
+    e = Utils(c.random_predictions(data = 'dev'), train_labels)
+    score =e.evaluation()
+    print("The accruacy socre is ", score)
+
 
 
 

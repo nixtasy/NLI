@@ -49,5 +49,6 @@ class Utils:
         self.recall()
         self.f1()
         self.accuracy()
-        print("Precison %f, Recall %f, Accuracy %f, F1 %f" % (self.P, self.R, self.A, self.F))
+        # print("Precison %f, Recall %f, Accuracy %f, F1 %f" % (self.P, self.R, self.A, self.F))
+        return self.A
 
