@@ -4,8 +4,8 @@ class Perceptron:
         self.weight = None
         self.prediction = None
         self.learning_rate = 0.6
-        self.overflow_batch_size = 1024
-        self.max_epoch = 200
+        self.overflow_batch_size = 4096
+        self.max_epoch = 20
         self.weight_init_seed = 1
         self.decay_rate = 0.9
 
@@ -23,6 +23,10 @@ class Perceptron:
     def train(self, features, labels):
         self.weight = [self.weight_init_seed] * (len(features[0]) + 1) # add bias in the beginning
         for epo in range(self.max_epoch):
+            # start_state = random.getstate()
+            # random.shuffle(features)
+            # random.setstate(start_state)
+            # random.shuffle(labels)
             """
                 Standard Gradient Descent
             """

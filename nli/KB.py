@@ -11,7 +11,6 @@ class KB:
     def add_feature(self, feature):
         self.F.append(feature)
 
-
     def feature_extraction(self):
 
         tokens_o1 = [token.lower() for token in self.o1.split()]
