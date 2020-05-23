@@ -30,46 +30,46 @@ class Perceptron:
             """
                 Standard Gradient Descent
             """
-            # for index, feature in enumerate(features):
-            #     x = [1] # add bias
-            #     x.extend(feature)
-            #     y = labels[index]
-            #     y_hat = self.feedforward(x)
-            #     if y == 1:
-            #         if y_hat < 0:
-            #             for i in range(len(self.weight)):
-            #                 self.weight[i] += self.learning_rate * x[i]
-            #     else:
-            #         if y_hat > 0:
-            #             for i in range(len(self.weight)):
-            #                 self.weight[i] -= self.learning_rate * x[i]
-
-            """
-            
-               Adapted Mini-batch Stochastic Gradient Descent with Learning Rate Decay
-            
-            """
-            correct_counts = 0
-            while correct_counts < self.overflow_batch_size:
-                self.learning_rate *= self.decay_rate
-                # index = np.random.randint(0, len(labels) - 1)
-                index = random.randint(0,len(labels)-1)
-                x = [1]  # add bias
-                x.extend(features[index])
+            for index, feature in enumerate(features):
+                x = [1] # add bias
+                x.extend(feature)
                 y = labels[index]
                 y_hat = self.feedforward(x)
                 if y == 1:
                     if y_hat < 0:
                         for i in range(len(self.weight)):
                             self.weight[i] += self.learning_rate * x[i]
-                    else:
-                        correct_counts += 1
                 else:
                     if y_hat > 0:
                         for i in range(len(self.weight)):
                             self.weight[i] -= self.learning_rate * x[i]
-                    else:
-                        correct_counts += 1
+
+            """
+            
+               Adapted Mini-batch Stochastic Gradient Descent with Learning Rate Decay
+            
+            """
+            # correct_counts = 0
+            # while correct_counts < self.overflow_batch_size:
+            #     self.learning_rate *= self.decay_rate
+            #     # index = np.random.randint(0, len(labels) - 1)
+            #     index = random.randint(0,len(labels)-1)
+            #     x = [1]  # add bias
+            #     x.extend(features[index])
+            #     y = labels[index]
+            #     y_hat = self.feedforward(x)
+            #     if y == 1:
+            #         if y_hat < 0:
+            #             for i in range(len(self.weight)):
+            #                 self.weight[i] += self.learning_rate * x[i]
+            #         else:
+            #             correct_counts += 1
+            #     else:
+            #         if y_hat > 0:
+            #             for i in range(len(self.weight)):
+            #                 self.weight[i] -= self.learning_rate * x[i]
+            #         else:
+            #             correct_counts += 1
 
             print("finish epoch ", epo , "..")
 
