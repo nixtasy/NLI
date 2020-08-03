@@ -1,59 +1,49 @@
-Abductive Natural Language Inference (aNLI) is a commonsense benchmark
-dataset designed to test an AI system’s capability to apply abductive reasoning
-and common sense to form possible explanations for a given set of observations.
-Formulated as a binary-classification task, the goal is to pick the most
-plausible explanatory hypothesis given two observations from narrative
-contexts.
+# Abductive Natural Language Inference with Pre-trained Deep Language Models
 
-The data in this archive was originally downloaded from
-[here](https://storage.googleapis.com/ai2-mosaic/public/alphanli/alphanli-train-dev.zip).
-To find more details about the dataset, checkout
-[this](https://arxiv.org/abs/1908.05739) paper.
+# Tianxiang Wang, Zhe Fan (Group 6)
 
-Originally, the files are formatted as Jsonlines (each line is a json object, i.e. one instance per line).
-Each instance in the dataset consists of the following fields:
 
+## Usage
+
+### Set up environment
+
+L2R2 is tested on Python 3.7, PyTorch 1.0.1, and transformers==2.10.0
+
+
+### Prepare data
+
+[αNLI](https://leaderboard.allenai.org/anli/submissions/get-started)
+```shell script
+$ wget https://storage.googleapis.com/ai2-mosaic/public/alphanli/alphanli-train-dev.zip
+$ unzip -d alphanli alphanli-train-dev.zip
 ```
-story_id: Story ID
-obs1: First observation in narrative order. (i.e. time order)
-obs2: Second observation in narrative order.
-hyp1: First hypothesis choice.
-hyp2: Second hypothesis choice.
-```
-You can find the jsonl formatted files in the folder ``jsonl/``.
+### Statistics
 
-Example entry:
-
-```
-{
-  "story_id": "005c14c3-27e6-45fe-8a1e-aa1a53ee6602-1",
-  "obs1": "Jasper told his parents that he wanted a dog.",
-  "obs2": "His parents decided not to give him a dog.",
-  "hyp1": "Jasper asked his parents, but they were allergic to dogs.",
-  "hyp2": "Jasper asked his parents, but they were allergic to rabbits."
-}
-```
+The statistics of the corpora is give by `stats.py`
 
 
-The labels are available in the jsonl/{train/dev}-labels.lst file in the following format:
-```
-2
-1
-1
-…
-```
+### Baseline
 
-Labels 1 and 2 correspond to hyp1 or hyp2 (indicating which hypothesis correctly supports the observations).
+We implemented perceptron classifier and decision tree with handcrafted features
 
-We also provide you the dataset formated as TSV (fields are separated by tabs).
-Find this dataset in the folder ``tsv/``.
-In the tsv format we join the labels with the instances and the header is the following:
 
-story_id	obs1	obs2	hyp1	hyp2	label
+### Fine-tuning pre-trained models
 
-Example entry:
-```
-000731f7-c71d-49c8-b8cd-b6848933db99-1  Chad loves Barry Bonds. Chad ensured that he took a picture to remember the event.     Chad missed Barry Bonds.        Chad met Barry Bonds.   2
-```
+We fine-tuned the pre-trained models on 1 Titan X GPU. 
 
-One can submit their predictions (here)[https://leaderboard.allenai.org/anli/submissions/get-started] .
+The available `model` for fine-tuning could selected in:
+- BERT base uncased Multiplce Choice
+- BERT large Multiplce Choice
+- RoBERTa base uncased Multiplce Choice
+- RoBERTa large uncased Multiplce Choice
+
+### L2R format
+
+Traininf instances could be formulated into format which is suitable for learning to rank
+`process.py`
+
+### L2R losses
+
+We have implemented two learn to rank losses in `losses.py`
+- RankNet: pair-wise logistic loss
+- ListNet: list-wise K-L Divegence
