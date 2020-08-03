@@ -1,6 +1,10 @@
 # Abductive Natural Language Inference with Pre-trained Deep Language Models
 
-# Tianxiang Wang, Zhe Fan (Group 6)
+---
+author:
+  - Tianxiang Wang
+  - Zhe Fan
+---
 
 
 ## Usage
